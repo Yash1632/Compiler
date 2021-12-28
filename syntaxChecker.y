@@ -3,24 +3,20 @@
 #include <string.h>
 #include <stdlib.h>
 #include "y.tab.h"
-struct tokenList
-{
-	char *token,type[20],line[100];
-	struct tokenList *next;
-};
-typedef struct tokenList tokenList;
+#include "semantic.h"
+
+
 
 extern FILE *yyin;
 extern int lineCount;
 extern char *tablePtr;
+extern char *tablePtr;
 extern int nestedCommentCount;
 extern int commentFlag;
+extern int arrayIndexErr;
 
-char typeBuffer=' ';
 
-tokenList *symbolPtr = NULL;
-tokenList *constantPtr = NULL;
-tokenList *parsedPtr=NULL;
+
 
 char *sourceCode=NULL;
 int errorFlag=0;
@@ -36,7 +32,7 @@ void makeList(char *,char,int);
 
 %token IDENTIFIER
 
-%token CONSTANT STRING_LITERAL
+%token CONSTANT FLCONSTANT STRING_LITERAL
 
 %token ELLIPSIS
 
@@ -53,14 +49,15 @@ void makeList(char *,char,int);
 %%
 
 primary_expression
-	: IDENTIFIER  		{ makeList(tablePtr, 'v', lineCount); }
-	| CONSTANT    		{ makeList(tablePtr, 'c', lineCount);}
+	: IDENTIFIER  		{ $$=checkScope(tablePtr,lineCount); }
+	| FLCONSTANT 		{tempCheckType=4;}
+	| CONSTANT    		{ addConstant(tablePtr, lineCount);}
 	| STRING_LITERAL  	{ makeList(tablePtr, 's', lineCount);}
-	| '(' expression ')' 	{ makeList("(", 'p', lineCount); makeList(")", 'p', lineCount); }
+	| '(' expression ')' 	{ makeList("(", 'p', lineCount); makeList(")", 'p', lineCount); $$=$2; }
 	;
 
 postfix_expression
-	: primary_expression
+	: primary_expression   {$$=$1;}
 	| postfix_expression '[' expression ']' 		{ makeList("[", 'p', lineCount); makeList("]", 'p', lineCount); }
 	| postfix_expression '(' ')' 				{ makeList("(", 'p', lineCount); makeList(")", 'p', lineCount); }
 	| postfix_expression '(' argument_expression_list ')' 	{ makeList("(", 'p', lineCount); makeList(")", 'p', lineCount); }
@@ -71,12 +68,12 @@ postfix_expression
 	;
 
 argument_expression_list
-	: assignment_expression
+	: assignment_expression {$$=$1;}
 	| argument_expression_list ',' assignment_expression { makeList(",",'p', lineCount); }
 	;
 
 unary_expression
-	: postfix_expression
+	: postfix_expression {$$=$1;}
 	| INC_OP unary_expression 	{ makeList("++",'o', lineCount); }
 	| DEC_OP unary_expression 	{ makeList("--",'o', lineCount); }
 	| unary_operator cast_expression
@@ -95,31 +92,31 @@ unary_operator
 	;
 
 cast_expression
-	: unary_expression
+	: unary_expression   {$$=$1;}
 	| '(' type_name ')' cast_expression { makeList("(", 'p', lineCount); makeList(")", 'p', lineCount); }
 	;
 
 multiplicative_expression
-	: cast_expression
+	: cast_expression {$$=$1;}
 	| multiplicative_expression '*' cast_expression { makeList("*",'o', lineCount); }
 	| multiplicative_expression '/' cast_expression { makeList("/",'o', lineCount); }
 	| multiplicative_expression '%' cast_expression { makeList("%",'o', lineCount); }
 	;
 
 additive_expression
-	: multiplicative_expression
+	: multiplicative_expression {$$=$1;}
 	| additive_expression '+' multiplicative_expression { makeList("+",'o', lineCount); }
 	| additive_expression '-' multiplicative_expression { makeList("-",'o', lineCount); }
 	;
 
 shift_expression
-	: additive_expression
+	: additive_expression {$$=$1;}
 	| shift_expression LEFT_OP additive_expression 	{ makeList("<<",'o', lineCount); }
 	| shift_expression RIGHT_OP additive_expression { makeList(">>",'o', lineCount); }
 	;
 
 relational_expression
-	: shift_expression
+	: shift_expression {$$=$1;}
 	| relational_expression '<' shift_expression
 	| relational_expression '>' shift_expression
 	| relational_expression LE_OP shift_expression { makeList("<=",'o', lineCount); }
@@ -127,44 +124,44 @@ relational_expression
 	;
 
 equality_expression
-	: relational_expression
+	: relational_expression {$$=$1;}
 	| equality_expression EQ_OP relational_expression { makeList("==",'o', lineCount); }
 	| equality_expression NE_OP relational_expression { makeList("!=",'o', lineCount); }
 	;
 
 and_expression
-	: equality_expression
+	: equality_expression {$$=$1;}
 	| and_expression '&' equality_expression 	{ makeList("&", 'o', lineCount);}
 	;
 
 exclusive_or_expression
-	: and_expression
+	: and_expression {$$=$1;}
 	| exclusive_or_expression '^' and_expression 	{ makeList("^", 'o', lineCount); }
 	;
 
 inclusive_or_expression
-	: exclusive_or_expression
+	: exclusive_or_expression {$$=$1;}
 	| inclusive_or_expression '|' exclusive_or_expression { makeList("|", 'o', lineCount); }
 	;
 
 logical_and_expression
-	: inclusive_or_expression
+	: inclusive_or_expression {$$=$1;}
 	| logical_and_expression AND_OP inclusive_or_expression { makeList("&&", 'o', lineCount); }
 	;
 
 logical_or_expression
-	: logical_and_expression
+	: logical_and_expression {$$=$1;}
 	| logical_or_expression OR_OP logical_and_expression { makeList("||", 'o', lineCount); }
 	;
 
 conditional_expression
-	: logical_or_expression
+	: logical_or_expression {$$=$1;}
 	| logical_or_expression '?' expression ':' conditional_expression { makeList("?:",'o', lineCount); }
 	;
 
 assignment_expression
-	: conditional_expression
-	| unary_expression assignment_operator assignment_expression
+	: conditional_expression {$$=$1;}
+	| unary_expression assignment_operator assignment_expression {$$=$3; checkType($1,$3,lineCount);}
 	;
 
 assignment_operator
@@ -182,7 +179,7 @@ assignment_operator
 	;
 
 expression
-	: assignment_expression
+	: assignment_expression {$$=$1;}
 	| expression ',' assignment_expression { makeList(",", 'p', lineCount); }
 	;
 
@@ -227,7 +224,7 @@ type_specifier
 	| CHAR 		{ makeList("char", 'k', lineCount); typeBuffer='c';}
 	| SHORT 	{ makeList("short", 'k', lineCount);}
 	| INT 		{ makeList("int", 'k', lineCount); typeBuffer='i';}
-	| LONG 		{ makeList("lon``g", 'k', lineCount);}
+	| LONG 		{ makeList("long", 'k', lineCount);}
 	| FLOAT 	{ makeList("float", 'k', lineCount);	typeBuffer='f';}
 	| DOUBLE 	{ makeList("double", 'k', lineCount);}
 	| SIGNED 	{ makeList("signed", 'k', lineCount);}
@@ -302,8 +299,8 @@ declarator
 	;
 
 direct_declarator
-	: IDENTIFIER 						{ makeList(tablePtr, 'v', lineCount); }
-	| '(' declarator ')' 					{ makeList("(", 'p', lineCount); makeList(")", 'p', lineCount); }
+	: IDENTIFIER 						{  checkDeclaration(tablePtr,lineCount,scopeCount);}
+	| '(' declarator ')' 					{  makeList("(", 'p', lineCount); makeList(")", 'p', lineCount); }
 	| direct_declarator '[' constant_expression ']' 	{ makeList("[", 'p', lineCount); makeList("]", 'p', lineCount); }
 	| direct_declarator '[' ']' 				{ makeList("[", 'p', lineCount); makeList("]", 'p', lineCount); }
 	| direct_declarator '(' parameter_type_list ')' 	{ makeList("(", 'p', lineCount); makeList(")", 'p', lineCount); }
@@ -341,8 +338,8 @@ parameter_declaration
 	;
 
 identifier_list
-	: IDENTIFIER 				{makeList(tablePtr, 'v', lineCount);}
-	| identifier_list ',' IDENTIFIER 	{ makeList(tablePtr, 'v', lineCount); makeList(",", 'p', lineCount); }
+	: IDENTIFIER 				{ checkDeclaration(tablePtr,lineCount,scopeCount);}
+	| identifier_list ',' IDENTIFIER 	{ checkDeclaration(tablePtr,lineCount,scopeCount);makeList(",", 'p', lineCount); }
 	;
 
 type_name
@@ -369,7 +366,7 @@ direct_abstract_declarator
 	;
 
 initializer
-	: assignment_expression
+	: assignment_expression {$$=$1;}
 	| '{' initializer_list '}'
 	| '{' initializer_list ',' '}'
 	;
@@ -381,7 +378,7 @@ initializer_list
 
 statement
 	: labeled_statement
-	| compound_statement
+	| compound_statement                  
 	| expression_statement
 	| selection_statement
 	| iteration_statement
@@ -395,10 +392,10 @@ labeled_statement
 	;
 
 compound_statement
-	: '{' '}'
-	| '{' statement_list '}'
-	| '{' declaration_list '}'
-	| '{' declaration_list statement_list '}'
+	: '{' '}' 				  	
+	| '{' statement_list '}'              		
+	| '{' declaration_list '}'			
+	| '{' declaration_list statement_list '}' 	
 	;
 
 declaration_list
@@ -413,7 +410,7 @@ statement_list
 
 expression_statement
 	: ';' 				{ makeList(";", 'p', lineCount); }
-	| expression ';' 	{ makeList(";", 'p', lineCount); }
+	| expression ';' 	        { makeList(";", 'p', lineCount); }
 	;
 
 selection_statement
@@ -452,12 +449,12 @@ translation_unit
 	;
 
 external_declaration
-	: function_definition
+	: function_definition	
 	| declaration
 	;
 
 function_definition
-	: declaration_specifiers declarator declaration_list compound_statement
+	: declaration_specifiers declarator declaration_list compound_statement  
 	| declaration_specifiers declarator compound_statement
 	| declarator declaration_list compound_statement
 	| declarator compound_statement
@@ -489,25 +486,26 @@ void main(int argc,char **argv){
 	}
 	if(commentFlag==1){
 		errorFlag=1;
-		printf("%s :					 %d : Nested Comment\n",sourceCode,lineCount);
+		printf("%s : %d : Nested Comment\n",sourceCode,lineCount);
     	}
-
-	if(!errorFlag){
+	
+		
+	
+	if(!errorFlag  && !semanticErr  && arrayIndexErr!=1){
 		
 		printf("\n\n\t\t%s Parsing Completed\n\n",sourceCode);
 		
 		
+	
 		FILE *writeParsed=fopen("parsedTable.txt","w");
-    		fprintf(writeParsed,"\n\t\t\t\tParsed	Table\n\n\t\tToken\t\t\tType\t\t\t\t\t\t\tLineNumber\n");
+    		fprintf(writeParsed,"\n\t\t\t\tParsed Table\n\n\t\tToken\t\t\t\t\t\tType\t\t\t\t\t\t\tLine Number\n");
       		for(tokenList *ptr=parsedPtr;ptr!=NULL;ptr=ptr->next){
   			fprintf(writeParsed,"\n%20s%30.30s%60s",ptr->token,ptr->type,ptr->line);
 		}
-		
-		
   		FILE *writeSymbol=fopen("symbolTable.txt","w");
-    		fprintf(writeSymbol,"\n\t\t\t\tSymbolTable\n\n\t\tToken\t\t\t\t\t\tType\t\t\t\t\t\t\tLine Number\n");
+    		fprintf(writeSymbol,"\n\t\t\t\tSymbolTable\n\n\t\tToken\t\t\t\tType\t\tLine Number\t\t\t\tScope\t\tFunction Number\n");
       		for(tokenList *ptr=symbolPtr;ptr!=NULL;ptr=ptr->next){
-  			fprintf(writeSymbol,"\n%20s%30.30s%60s",ptr->token,ptr->type,ptr->line);
+  			fprintf(writeSymbol,"\n%20s%30.30s%30s%30s\t%d\t%d",ptr->token,ptr->type,ptr->line,ptr->scope,ptr->scopeValue,ptr->funcCount+1);
 		}
 		
 		FILE *writeConstant=fopen("constantTable.txt","w");
@@ -518,6 +516,7 @@ void main(int argc,char **argv){
   	
   		fclose(writeSymbol);
 		fclose(writeConstant);
+		fclose(writeParsed);
 	}
 printf("\n\n");	
 }
@@ -641,3 +640,4 @@ void makeList(char *tokenName,char tokenType, int tokenLine)
     		}
 	}
 }
+

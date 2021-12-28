@@ -1,10 +1,10 @@
 
 				SymbolTable
 
-		Token						Type							Line Number
+		Token				Type		Line Number				Scope		Function Number
 
-                main                           INT                                                           2
-                   a                           INT                                                       3 4 6
-                   b                           INT                                                       3 5 6
-                   c                           INT                                                       3 6 7
-              printf                                                                                         7
+                main                           INT                             2                        GLOBAL	0	1
+                   a                           INT                         3 4 6                       NESTING	1	1
+                   b                           INT                         3 5 6                       NESTING	1	1
+                   c                           INT                         3 6 7                       NESTING	1	1
+              printf                                                           7                       NESTING	1	1

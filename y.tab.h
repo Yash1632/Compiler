@@ -83,31 +83,32 @@ extern int yydebug;
     WHILE = 289,
     IDENTIFIER = 290,
     CONSTANT = 291,
-    STRING_LITERAL = 292,
-    ELLIPSIS = 293,
-    PTR_OP = 294,
-    INC_OP = 295,
-    DEC_OP = 296,
-    LEFT_OP = 297,
-    RIGHT_OP = 298,
-    LE_OP = 299,
-    GE_OP = 300,
-    EQ_OP = 301,
-    NE_OP = 302,
-    AND_OP = 303,
-    OR_OP = 304,
-    MUL_ASSIGN = 305,
-    DIV_ASSIGN = 306,
-    MOD_ASSIGN = 307,
-    ADD_ASSIGN = 308,
-    SUB_ASSIGN = 309,
-    LEFT_ASSIGN = 310,
-    RIGHT_ASSIGN = 311,
-    AND_ASSIGN = 312,
-    XOR_ASSIGN = 313,
-    OR_ASSIGN = 314,
-    TYPE_NAME = 315,
-    LOWER_THAN_ELSE = 316
+    FLCONSTANT = 292,
+    STRING_LITERAL = 293,
+    ELLIPSIS = 294,
+    PTR_OP = 295,
+    INC_OP = 296,
+    DEC_OP = 297,
+    LEFT_OP = 298,
+    RIGHT_OP = 299,
+    LE_OP = 300,
+    GE_OP = 301,
+    EQ_OP = 302,
+    NE_OP = 303,
+    AND_OP = 304,
+    OR_OP = 305,
+    MUL_ASSIGN = 306,
+    DIV_ASSIGN = 307,
+    MOD_ASSIGN = 308,
+    ADD_ASSIGN = 309,
+    SUB_ASSIGN = 310,
+    LEFT_ASSIGN = 311,
+    RIGHT_ASSIGN = 312,
+    AND_ASSIGN = 313,
+    XOR_ASSIGN = 314,
+    OR_ASSIGN = 315,
+    TYPE_NAME = 316,
+    LOWER_THAN_ELSE = 317
   };
 #endif
 /* Tokens.  */
@@ -145,31 +146,32 @@ extern int yydebug;
 #define WHILE 289
 #define IDENTIFIER 290
 #define CONSTANT 291
-#define STRING_LITERAL 292
-#define ELLIPSIS 293
-#define PTR_OP 294
-#define INC_OP 295
-#define DEC_OP 296
-#define LEFT_OP 297
-#define RIGHT_OP 298
-#define LE_OP 299
-#define GE_OP 300
-#define EQ_OP 301
-#define NE_OP 302
-#define AND_OP 303
-#define OR_OP 304
-#define MUL_ASSIGN 305
-#define DIV_ASSIGN 306
-#define MOD_ASSIGN 307
-#define ADD_ASSIGN 308
-#define SUB_ASSIGN 309
-#define LEFT_ASSIGN 310
-#define RIGHT_ASSIGN 311
-#define AND_ASSIGN 312
-#define XOR_ASSIGN 313
-#define OR_ASSIGN 314
-#define TYPE_NAME 315
-#define LOWER_THAN_ELSE 316
+#define FLCONSTANT 292
+#define STRING_LITERAL 293
+#define ELLIPSIS 294
+#define PTR_OP 295
+#define INC_OP 296
+#define DEC_OP 297
+#define LEFT_OP 298
+#define RIGHT_OP 299
+#define LE_OP 300
+#define GE_OP 301
+#define EQ_OP 302
+#define NE_OP 303
+#define AND_OP 304
+#define OR_OP 305
+#define MUL_ASSIGN 306
+#define DIV_ASSIGN 307
+#define MOD_ASSIGN 308
+#define ADD_ASSIGN 309
+#define SUB_ASSIGN 310
+#define LEFT_ASSIGN 311
+#define RIGHT_ASSIGN 312
+#define AND_ASSIGN 313
+#define XOR_ASSIGN 314
+#define OR_ASSIGN 315
+#define TYPE_NAME 316
+#define LOWER_THAN_ELSE 317
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
