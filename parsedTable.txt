@@ -1,0 +1,24 @@
+
+				Parsed	Table
+
+		Token			Type							LineNumber
+
+                 int                       Keyword                                                         2 3
+                main                    Identifier                                                           2
+                   (                    Punctuator                                                         2 7
+                   )                    Punctuator                                                         2 7
+                   {                    Punctuator                                                           2
+                   a                    Identifier                                                       3 4 6
+                   b                    Identifier                                                       3 5 6
+                   ,                    Punctuator                                                       3 3 7
+                   c                    Identifier                                                       3 6 7
+                   ;                    Punctuator                                                 3 4 5 6 7 8
+                   =                      Operator                                                       4 5 6
+                  40                      Constant                                                           4
+                  30                      Constant                                                           5
+                   +                      Operator                                                           6
+              printf                    Identifier                                                           7
+        "Result: %d"                String Literal                                                           7
+                   0                      Constant                                                           8
+              return                       Keyword                                                           8
+                   }                    Punctuator                                                           9

@@ -1,0 +1,10 @@
+
+				SymbolTable
+
+		Token						Type							Line Number
+
+                main                           INT                                                           2
+                   a                           INT                                                       3 4 6
+                   b                           INT                                                       3 5 6
+                   c                           INT                                                       3 6 7
+              printf                                                                                         7
