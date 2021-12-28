@@ -1,0 +1,11 @@
+
+			   Symbol Table
+			------------------
+
+   Name            DataType      ReturnType      Offset          Scope
+------------------------------------------------------------------------
+a                    Int            None           0            main        
+b                    Int            None           4            main        
+c                    Int            None           8            main        
+Ti_1                 Int            None           12           main        
+main                 Main           Int            16           None        
