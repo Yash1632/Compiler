@@ -1,10 +1,11 @@
 
-				SymbolTable
+			   Symbol Table
+			------------------
 
-		Token				Type		Line Number				Scope		Function Number
-
-                main                           INT                             2                        GLOBAL	0	1
-                   a                           INT                         3 4 6                       NESTING	1	1
-                   b                           INT                         3 5 6                       NESTING	1	1
-                   c                           INT                         3 6 7                       NESTING	1	1
-              printf                                                           7                       NESTING	1	1
+   Name            DataType      ReturnType      Offset          Scope
+------------------------------------------------------------------------
+a                    Int            None           0            main        
+b                    Int            None           4            main        
+c                    Int            None           8            main        
+Ti_1                 Int            None           12           main        
+main                 Main           Int            16           None        
